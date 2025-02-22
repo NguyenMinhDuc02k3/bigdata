@@ -40,6 +40,6 @@ services:
 
 networks:
   mynet:
-    name: mrnamnet
+    name: mainsv
     driver: bridge
 

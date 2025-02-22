@@ -4,42 +4,40 @@ services:
   rng:
     build: rng
     ports:
-    - "8001:80"
+      - "8001:80"
     container_name: rng
     networks:
-      - mynet
+      - Mainsv
 
   hasher:
     build: hasher
     ports:
-    - "8002:80"
+      - "8002:80"
     container_name: hasher
     networks:
-      - mynet
+      - Mainsv
 
   webui:
     build: webui
     ports:
-    - "8000:80"
+      - "8000:80"
     volumes:
-    - "./webui/files/:/files/"
+      - "./webui/files/:/files/"
     container_name: webui
     networks:
-      - mynet
+      - Mainsv
 
   redis:
     image: redis
     container_name: redis
     networks:
-      - mynet
+      - Mainsv
 
   worker:
     build: worker
     networks:
-      - mynet
+      - Mainsv
 
 networks:
-  mynet:
-    name: Mainsv
-    driver: bridge
-
+  Mainsv:
+    external: true

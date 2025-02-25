@@ -40,5 +40,6 @@ services:
 
 networks:
   mynet:
+    name: mrnamnet
     driver: bridge
 

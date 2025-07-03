@@ -1,0 +1,94 @@
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+    networks:
+      - coinswarmnet
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
+      - DOCKER_INFLUXDB_INIT_ORG=nam-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=nam-bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-token
+    networks:
+      - coinswarmnet
+
+  telegraf:
+    image: telegraf:latest
+    networks:
+      - coinswarmnet
+    configs:
+      - source: telegraf_config
+        target: /etc/telegraf/telegraf.conf
+    deploy:
+      mode: global
+      endpoint_mode: dnsrr
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_SERVER_ROOT_URL=/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - coinswarmnet
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    networks:
+      - coinswarmnet
+    deploy:
+      mode: global
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - coinswarmnet
+
+configs:
+  prometheus_config:
+    file: ./prometheus.yml
+
+  telegraf_config:
+    file: ./telegraf.conf
+
+networks:
+  coinswarmnet:
+    external: true
+volumes:
+  influxdb_data:
+  grafana_data:

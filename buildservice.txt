@@ -1,0 +1,6 @@
+sudo docker network create --scope=swarm --attachable -d overlay --opt encrypted coinswarmnet
+sudo docker service create --name redis --network coinswarmnet redis
+sudo docker service create --name rng -p 8001:80 --network coinswarmnet minhduc2k3/rng:coinswarm
+sudo docker service create --name hasher -p 8002:80 --network coinswarmnet minhduc2k3/hasher:coinswarm
+sudo docker service create --name worker  --network coinswarmnet minhduc2k3/worker:coinswarm
+sudo docker service create --name webui -p 8000:80 --network coinswarmnet minhduc2k3/webui:coinswarm
